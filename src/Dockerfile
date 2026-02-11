@@ -11,12 +11,14 @@ RUN pip install --no-cache-dir --upgrade pip>=25.3
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Install Node.js and pnpm with specific versions
+# Install Node.js, pnpm, and Azure CLI
 RUN apt-get update \
-    && apt-get install -y curl \
+    && apt-get install -y curl gnupg2 lsb-release \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g pnpm@10.6.0 \
+    && curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
+    && az --version \
     && node --version \
     && pnpm --version
 
