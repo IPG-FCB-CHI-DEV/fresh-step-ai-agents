@@ -20,6 +20,14 @@ param searchServiceName string = ''
 param appInsightConnectionName string
 param tags object = {}
 param aoaiConnectionName string
+@description('Name of the parent deployment (passed from the top-level deployment) used to generate unique nested deployment names.')
+param parentDeploymentName string
+
+@description('A per-deployment seed value (passed from the top-level deployment) used to avoid collisions on nested deployment names across retries.')
+param deploymentSeed string
+
+var deploymentSuffix = substring(uniqueString(parentDeploymentName, deploymentSeed), 0, 8)
+
 module storageAccount '../storage/storage-account.bicep' = {
   name: 'storageAccount'
   params: {
@@ -59,7 +67,7 @@ module storageAccount '../storage/storage-account.bicep' = {
 
 module logAnalytics '../monitor/loganalytics.bicep' =
   if (!empty(logAnalyticsName)) {
-    name: 'logAnalytics'
+    name: 'logAnalytics-${deploymentSuffix}'
     params: {
       location: location
       tags: tags
@@ -69,7 +77,7 @@ module logAnalytics '../monitor/loganalytics.bicep' =
 
 module applicationInsights '../monitor/applicationinsights.bicep' =
   if (!empty(applicationInsightsName) && !empty(logAnalyticsName)) {
-    name: 'applicationInsights'
+    name: 'applicationInsights-${deploymentSuffix}'
     params: {
       location: location
       tags: tags
@@ -91,7 +99,7 @@ module cognitiveServices '../ai/cognitiveservices.bicep' = {
     appInsightConnectionName: appInsightConnectionName
     appInsightConnectionString: applicationInsights.outputs.connectionString
     storageAccountId: storageAccount.outputs.id
-    storageAccountConnectionName: storageAccount.outputs.name
+    storageAccountConnectionName: 'storageAccount'
     storageAccountBlobEndpoint: storageAccount.outputs.primaryEndpoints.blob
     aoaiConnectionName: aoaiConnectionName
   }
@@ -115,6 +123,16 @@ module projectStorageRoleAssignment  '../../core/security/role.bicep' = {
   }
 }
 
+module projectAIUserRoleAssignment  '../../core/security/role.bicep' = {
+  name: 'ai-project-role-ai-user'
+  params: {
+    principalType: 'ServicePrincipal'
+    principalId: cognitiveServices.outputs.projectPrincipalId
+    roleDefinitionId: '53ca6127-db72-4b80-b1b0-d745d6d5456d' // Azure AI User
+  }
+}
+
+
 module searchService '../search/search-services.bicep' =
   if (!empty(searchServiceName)) {
     dependsOn: [cognitiveServices]
@@ -130,10 +148,22 @@ module searchService '../search/search-services.bicep' =
     }
   }
 
+module searchServiceStorageRoleAssignment '../../core/security/role.bicep' =
+  if (!empty(searchServiceName)) {
+    name: 'search-service-role-storage-blob-data-reader'
+    params: {
+      principalType: 'ServicePrincipal'
+      principalId: !empty(searchServiceName) ? searchService.outputs.principalId : ''
+      roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1' // Storage Blob Data Reader
+    }
+  }
+
 
 // Outputs
 output storageAccountId string = storageAccount.outputs.id
 output storageAccountName string = storageAccount.outputs.name
+output storageConnectionId string = cognitiveServices.outputs.storageConnectionId
+output storageConnectionName string = cognitiveServices.outputs.storageConnectionName
 
 output applicationInsightsId string = !empty(applicationInsightsName) ? applicationInsights.outputs.id : ''
 output applicationInsightsName string = !empty(applicationInsightsName) ? applicationInsights.outputs.name : ''

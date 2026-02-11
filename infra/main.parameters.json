@@ -10,6 +10,12 @@
     },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
+    },    
+    "principalTypeOverride": {
+      "value": "${PRINCIPAL_TYPE_OVERRIDE=User}"
+    },
+    "principalIdOverride": {
+      "value": "${PRINCIPAL_ID_OVERRIDE}"
     },
     "resourceGroupName": {
       "value": "${AZURE_RESOURCE_GROUP}"
@@ -60,16 +66,16 @@
       "value": "${AZURE_EXISTING_AGENT_ID}"
     },
     "agentDeploymentName": {
-      "value": "${AZURE_AI_AGENT_MODEL_NAME=gpt-4o-mini}"
+      "value": "${AZURE_AI_AGENT_MODEL_NAME=gpt-5-mini}"
     },
     "agentModelFormat": {
       "value": "${AZURE_AI_AGENT_MODEL_FORMAT=OpenAI}"
     },
     "agentModelName": {
-      "value": "${AZURE_AI_AGENT_MODEL_NAME=gpt-4o-mini}"
+      "value": "${AZURE_AI_AGENT_MODEL_NAME=gpt-5-mini}"
     },
     "agentModelVersion": {
-      "value": "${AZURE_AI_AGENT_MODEL_VERSION=2024-07-18}"
+      "value": "${AZURE_AI_AGENT_MODEL_VERSION=2025-08-07}"
     },
     "agentDeploymentSku": {
       "value": "${AZURE_AI_AGENT_DEPLOYMENT_SKU=GlobalStandard}"
@@ -95,8 +101,8 @@
     "embedDeploymentCapacity": {
       "value": "${AZURE_AI_EMBED_DEPLOYMENT_CAPACITY=50}"
     },
-        "embeddingDeploymentDimensions": {
-      "value": "${AZURE_AI_EMBED_DIMENSIONS=100}"
+    "embeddingDeploymentDimensions": {
+      "value": "${AZURE_AI_EMBED_DIMENSIONS=1536}"
     },
     "apiAppExists": {
       "value": "${SERVICE_API_RESOURCE_EXISTS=false}"
@@ -110,11 +116,20 @@
     "enableAzureMonitorTracing": {
       "value": "${ENABLE_AZURE_MONITOR_TRACING=false}"
     },
-    "azureTracingGenAIContentRecordingEnabled": {
-      "value": "${AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED=false}"
+    "otelInstrumentationGenAICaptureMessageContent": {
+      "value": "${OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=false}"
     },
     "templateValidationMode": {
       "value": "${TEMPLATE_VALIDATION_MODE=false}"
+    },
+    "searchServiceEndpoint": {
+      "value": "${AZURE_AI_SEARCH_ENDPOINT}"
+    },
+    "searchConnectionId": {
+      "value": "${SEARCH_CONNECTION_ID}"
+    },
+    "blobContainerName": {
+      "value": "${AZURE_BLOB_CONTAINER_NAME=documents}"
     }
   }
 }

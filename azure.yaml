@@ -4,7 +4,7 @@
 
 name: azd-get-started-with-ai-agents
 metadata:
-  template: azd-get-started-with-ai-agents@1.0.4
+  template: azd-get-started-with-ai-agents@2.2.0
 requiredVersions:
   azd: ">=1.14.0"
 
@@ -20,17 +20,6 @@ hooks:
       run: ./scripts/validate_env_vars.ps1
       interactive: true
       continueOnError: false      
-  postprovision:
-    windows:
-      shell: pwsh
-      run: ./scripts/write_env.ps1
-      continueOnError: true
-      interactive: true
-    posix:
-      shell: sh
-      run: chmod u+r+x ./scripts/write_env.sh; ./scripts/write_env.sh;
-      continueOnError: true
-      interactive: true
   postdeploy:
     windows:
       shell: pwsh
@@ -85,4 +74,4 @@ pipeline:
     - AZURE_EXISTING_AIPROJECT_ENDPOINT
     - AZURE_EXISTING_AGENT_ID
     - ENABLE_AZURE_MONITOR_TRACING
-    - AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED
+    - OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT

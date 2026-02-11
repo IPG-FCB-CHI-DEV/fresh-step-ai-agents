@@ -47,11 +47,13 @@ pnpm run setup
 
 ### 4. Environment Configuration
 
-Fill in the environment variables in `.env` file in the `src` directory.
+**Important**: The environment variables are stored in the `.azure/<environment-name>/.env` file, **not** in the root or `src` directory. This file is automatically created when running `azd up` and contains all the Azure resource configuration needed for local development.
 
-## Running the Development Server
+The application automatically loads environment variables from `.env` in `.azure` folder when running locally.
 
-### 1. Build Frontend (Optional)
+## Running the Development Server by CLI
+
+### 1. Build Frontend
 
 If you have changes in `src/frontend`, build the React application:
 
@@ -83,6 +85,33 @@ python -m uvicorn "api.main:create_app" --factory --reload
 ### 4. Access the Application
 
 Click '<http://127.0.0.1:8000>' in the terminal, which should open a new tab in the browser. Enter your message in the box to test the agent.
+
+## Debugging with VS Code
+
+VS Code provides two debug configurations for easy debugging:
+
+![VS Code Launch Profiles](images/vs_code_launch.png)
+
+### Available Launch Profiles
+
+1. **Debug: Initialize Agent (Gunicorn)** - Runs `gunicorn.conf.py` to test agent initialization and configuration
+2. **Debug: FastAPI Server (Uvicorn)** - Runs the FastAPI server with hot-reload for API development
+
+### How to Debug
+
+1. Click on the **Run and Debug** icon in the VS Code left sidebar
+2. Select the desired launch profile from the dropdown at the top
+3. Click the green **Start Debugging** button
+4. Set breakpoints in your code by clicking on the left margin of the editor
+
+### Important: Debugging FastAPI with Existing Agent
+
+When debugging the **FastAPI Server**, you **must** specify the `AZURE_EXISTING_AGENT_ID` environment variable in your `.azure/<environment-name>/.env` file. This tells the application to use an existing agent instead of creating a new one.
+
+Example:
+```properties
+AZURE_EXISTING_AGENT_ID="agent-template-assistant:1"
+```
 
 ## Frontend Development and Customization
 
@@ -119,9 +148,9 @@ To customize agent instructions or tools when creating **new agents**, modify th
 
 ### Modifying Existing Agents
 
-**Important**: If you want to modify an **existing agent** that's already deployed, it's recommended to use the **Azure AI Foundry UI** instead of the script:
+**Important**: If you want to modify an **existing agent** that's already deployed, it's recommended to use the **Microsoft Foundry UI** instead of the script:
 
-1. Go to your Azure AI Foundry project
+1. Go to your Microsoft Foundry project
 2. Navigate to the Agents section
 3. Select your agent
 4. Update instructions, tools, or settings directly in the UI
@@ -132,39 +161,38 @@ This approach is safer for existing agents as it preserves the agent's conversat
 
 ### Adding or Updating Files
 
-If you want to add new files to the `src/files/` folder or update the embedded data in `src/data/embeddings.csv` that your agent uses, **you must do this BEFORE agent creation**. The agent creation process in `src/gunicorn.conf.py` uploads and embeds files during initialization.
+If you want to add new files to the `src/files/` folder that your agent uses, **you must do this BEFORE agent creation**. The agent creation process in `src/gunicorn.conf.py` uploads these files to the vector store for OpenAI File Search and to blob storage so Azure AI Search can index them when enabled.
 
-**Two types of files are processed:**
-- **Individual Files**: Files in `src/files/` directory (used for file search)
-- **Embedded Data**: Pre-computed embeddings in `src/data/embeddings.csv` (used for Azure AI Search when enabled)
+**Single source of truth:**
+- Files in `src/files/` power both OpenAI File Search and Azure AI Search (when enabled).
 
 ### Important File Update Workflow
 
-1. **Before Agent Creation**: Add or update files in `src/files/` directory and/or update `src/data/embeddings.csv`
+1. **Before Agent Creation**: Add or update files in `src/files/` directory
 2. **Agent Creation**: Run the agent creation process (via local development or deployment)
-3. **Files Embedded**: Files are uploaded and embedded into the agent's knowledge base
+3. **Files Embedded**: Files are uploaded to the vector store and indexed for Azure AI Search
 
 ### If You Need to Update Files After Agent Creation
 
-If you've already created an agent and need to add or update files or embeddings data, you have two options:
+If you've already created an agent and need to add or update files, you have two options:
 
 #### Option 1: Delete and Recreate Agent (Recommended)
-1. Go to your **Azure AI Foundry UI**
+1. Go to your **Microsoft Foundry UI**
 2. Navigate to the **Agents** section
 3. **Delete the existing agent**
-4. Update files in `src/files/` directory and/or `src/data/embeddings.csv`
+4. Update files in `src/files/` directory
 5. **Restart your local development server** or **run `azd deploy`** again
 6. The agent will be recreated with the updated files
 
 #### Option 2: Force Recreation via Deployment
-1. Update files in `src/files/` directory and/or `src/data/embeddings.csv`
+1. Update files in `src/files/` directory
 2. Run `azd deploy` again
 3. This will trigger the agent recreation process with updated files
 
 ### Why This is Necessary
 
 - The agent creation script only processes files during the initial setup
-- File embedding happens once during agent initialization
+- File embedding and search indexing happen once during agent initialization
 - Existing agents don't automatically detect file changes
 - The agent's vector store/search index needs to be rebuilt with new content
 
@@ -174,11 +202,10 @@ If you've already created an agent and need to add or update files or embeddings
 
 - **No File Upload**: The agent will NOT upload new files from the `src/files/` directory
 - **No Vector Store Creation**: It will NOT create new vector stores for additional files
-- **No Reindexing**: It will NOT reindex or re-embed files, even if they've been modified
-- **No Embeddings Update**: It will NOT process updates to `src/data/embeddings.csv` for Azure AI Search
+- **No Reindexing/Re-embedding**: It will NOT rebuild the vector store or Azure AI Search index for changed files
 - **Uses Existing Resources**: The agent continues to use only the files, vector stores, and search indexes that were created during its initial setup
 
-This means that any changes you make to files in `src/files/` or updates to `src/data/embeddings.csv` after the agent is created will be completely ignored by the running agent. The agent initialization logic in `src/gunicorn.conf.py` only runs during the initial agent creation process, not during normal application operation.
+This means that any changes you make to files in `src/files/` after the agent is created will be completely ignored by the running agent. The agent initialization logic in `src/gunicorn.conf.py` only runs during the initial agent creation process, not during normal application operation.
 
 **Best Practice**: Plan your file structure and content before creating agents to minimize the need for recreation.
 

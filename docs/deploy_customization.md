@@ -1,7 +1,7 @@
 
-# Getting Started with Agents Using Azure AI Foundry: Deployment customization
+# Getting Started with Agents Using Microsoft Foundry: Deployment customization
 
-This document describes how to customize the deployment of the Agents Chat with Azure AI Foundry. Once you follow the steps here, you can run `azd up` as described in the section below.
+This document describes how to customize the deployment of the Agents Chat with Microsoft Foundry. Once you follow the steps here, you can run `azd up` as described in the section below.
 
 * [Use existing resources](#use-existing-resources)
 * [Enabling and disabling resources provision](#enabling-and-disabling-resources-provision)
@@ -9,7 +9,7 @@ This document describes how to customize the deployment of the Agents Chat with 
 * [Customizing model deployments](#customizing-model-deployments)
 
 ## Use existing resources
-Be default, this template provisions a new resource group along with other resources.   If you already have provisioned Azure AI Foundry and Azure AI Foundry Project (not a hub based project), you might reuse these resources by setting:
+Be default, this template provisions a new resource group along with other resources.   If you already have provisioned Microsoft Foundry and Microsoft Foundry Project (not a hub based project), you might reuse these resources by setting:
 
 To find the value:
 
@@ -40,8 +40,8 @@ Once you disable these resources, they will not be deployed when you run `azd up
 By default, this template will use a naming convention with unique strings to prevent naming collisions within Azure.
 To override default naming conventions, the following keys can be set:
 
-* `AZURE_AIPROJECT_NAME` - The name of the Azure AI Foundry project
-* `AZURE_AISERVICES_NAME` - The name of the Azure AI Foundry
+* `AZURE_AIPROJECT_NAME` - The name of the Microsoft Foundry project
+* `AZURE_AISERVICES_NAME` - The name of the Microsoft Foundry
 * `AZURE_STORAGE_ACCOUNT_NAME` - The name of the Storage Account
 * `AZURE_APPLICATION_INSIGHTS_NAME` - The name of the Application Insights instance
 * `AZURE_LOG_ANALYTICS_WORKSPACE_NAME` - The name of the Log Analytics workspace used by Application Insights
@@ -50,7 +50,7 @@ To override any of those resource names, run `azd env set <key> <value>` before 
 
 ## Customizing model deployments
 
-For more information on the Azure OpenAI models and non-Microsoft models that can be used in your deployment, view the [list of models supported by Azure AI Agent Service](https://learn.microsoft.com/azure/ai-services/agents/concepts/model-region-support).
+For more information on the Azure OpenAI models and non-Microsoft models that can be used in your deployment, view the [list of models supported by Foundry Agent Service](https://learn.microsoft.com/azure/ai-services/agents/concepts/model-region-support).
 
 To customize the model deployments, you can set the following environment variables:
 
@@ -65,13 +65,13 @@ azd env set AZURE_AI_AGENT_MODEL_FORMAT Microsoft
 Change the agent model name:
 
 ```shell
-azd env set AZURE_AI_AGENT_MODEL_NAME gpt-4o-mini
+azd env set AZURE_AI_AGENT_MODEL_NAME gpt-5-mini
 ```
 
 Set the version of the agent model:
 
 ```shell
-azd env set AZURE_AI_AGENT_MODEL_VERSION 2024-07-18
+azd env set AZURE_AI_AGENT_MODEL_VERSION 2025-08-07
 ```
 
 ### Setting models, capacity, and deployment SKU
@@ -100,3 +100,10 @@ Change the SKU of the embeddings deployment:
 
 ```shell
 azd env set AZURE_AI_EMBED_DEPLOYMENT_SKU Standard
+```
+
+Set the embedding model dimensionality (only when using AI Search):
+
+```shell
+azd env set AZURE_AI_EMBED_DIMENSIONS 1536
+```

@@ -5,7 +5,7 @@ param location string = resourceGroup().location
 param tags object = {}
 @description('The custom subdomain name used to access the API. Defaults to the value of the name parameter.')
 param customSubDomainName string = aiServiceName
-param disableLocalAuth bool = true
+param disableLocalAuth bool = false
 param deployments array = []
 param appInsightsId string
 param appInsightConnectionString string
@@ -139,3 +139,5 @@ output projectEndpoint string = aiProject.properties.endpoints['AI Foundry API']
 output PrincipalId string = account.identity.principalId
 output accountPrincipalId string = account.identity.principalId
 output projectPrincipalId string = aiProject.identity.principalId
+output storageConnectionId string = storageAccountConnection.id
+output storageConnectionName string = storageAccountConnection.name

@@ -84,7 +84,7 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' ex
 
     // AI Project Search Connection
     resource searchConnection 'connections' = {
-      name: 'searchConnection'
+      name: 'search'
       // dependsOn: [project] is implicitly handled by 'parent: project'
       properties: {
         category: 'CognitiveSearch'
@@ -96,7 +96,13 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' ex
           // and 'search.name' (which is 'searchServiceName') is known.
           key: search.listAdminKeys().primaryKey
         }
-      }      
+        metadata: {
+            type: 'azure_ai_search'
+            ApiType: 'Azure'
+            ResourceId: search.id
+            Location: location
+        }
+}      
     }
 
   }
@@ -107,5 +113,5 @@ output id string = search.id
 output endpoint string = 'https://${name}.search.windows.net/'
 output name string = search.name
 output principalId string = !empty(searchIdentityProvider) ? search.identity.principalId : ''
-output searchConnectionId string = ''
+output searchConnectionId string = !empty(searchIdentityProvider) ? aiServices::project::searchConnection.id : ''
 
