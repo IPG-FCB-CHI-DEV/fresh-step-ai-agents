@@ -11,6 +11,10 @@ RUN pip install --no-cache-dir --upgrade pip>=25.3
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
+# Upgrade libssl3 to fix CVE-2025-15467
+# Upgrade libpam0g to fix CVE-2025-6020
+RUN apt-get update && apt-get upgrade -y libssl3 libpam0g
+
 # Install Node.js, pnpm, and Azure CLI
 RUN apt-get update \
     && apt-get install -y curl gnupg2 lsb-release \
